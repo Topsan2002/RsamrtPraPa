@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:rsmart/TypeData/dashBoardData.dart';
+import 'package:rsmart/screen/confic/confic.dart';
 import 'package:rsmart/screen/dashboard/dashboard.dart';
 import 'package:rsmart/screen/dataUser/dataUser.dart';
 import 'package:rsmart/screen/editprofile/edit_profile.dart';
@@ -209,6 +210,52 @@ class _MenuState extends State<Menu> {
                                 );
                               },
                             ),
+                            SizedBox(
+                             width: size.width* 0.45,
+                             height: size.height*0.27,
+                             child:Card(
+                               color: Colors.red[300],
+                               child:Center(
+                                 child:Padding(
+                                   padding: EdgeInsets.all(8),
+                                   child: FlatButton(
+                                     onPressed: () async {
+                                          SharedPreferences user = await SharedPreferences.getInstance();
+                                          user.remove('user_id');
+                                          user.remove('admin_id');
+                                          user.remove('water_id');
+                                          user.remove('member_name');
+                                          user.remove('path');
+                                          Navigator.pushReplacement(
+                                            context,
+                                            PageTransition(child: Confic(), type: PageTransitionType.fade),
+                                            );
+                                     },
+                                     child:Column(
+                                       children: [
+                                         Image.asset(
+                                           'assets/icon/logout.png',
+                                           height: size.height*0.15,
+                                           width: size.width*0.2,
+                                         ),
+                                         Center(
+                                           child: Text(
+                                             'ออกจากระบบ',
+                                             style:TextStyle(
+                                               fontSize: 18,
+                                               fontWeight:FontWeight.bold,
+                                               color:Colors.white,
+                                             ),
+                                             textAlign: TextAlign.center,
+                                           ),
+                                         ),
+                                       ],
+                                     ),
+                                   ),
+                                 ),
+                               ),
+                             ),
+                            )
                           ],
                         ),
                       ),

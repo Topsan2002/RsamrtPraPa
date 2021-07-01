@@ -122,7 +122,7 @@ class _UnPayState extends State<UnPay> {
 
                   Container(
                     margin: EdgeInsets.all(20),
-                 //   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     decoration: BoxDecoration(
                       color: Colors.blue[50],
                       border: Border.all(width:1,color: Colors.blue),

@@ -48,7 +48,7 @@ class RoundBg extends StatelessWidget {
     Key? key,
     required this.child,
     this.color,
-  }) : super(key: key);
+  });
 
   
 
