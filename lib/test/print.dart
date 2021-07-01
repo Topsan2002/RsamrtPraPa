@@ -12,10 +12,14 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:http/http.dart' as http;
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:rsmart/TypeData/dataRecive.dart';
 import 'package:rsmart/TypeData/testdata.dart';
 import 'package:rsmart/screen/manage_unit/widged/widgetOtherPay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:barcode/barcode.dart';
 
 //void main() => runApp(const MyApp('Printing Demo'));
 
@@ -148,12 +152,18 @@ class _PrintTestState extends State<PrintTest> {
     var myStyle =  myFont;
     var styleText  = pw.TextStyle(font: myStyle, fontSize : 10); 
 
+    var qrCode = pw.BarcodeWidget(
+  color: PdfColor.fromHex("#000000"),
+  barcode: pw.Barcode.qrCode(),
+  data: "My data",
+);
+
     
 
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat(5.4 * PdfPageFormat.cm, 15.5 * PdfPageFormat.cm, marginAll: 0.3 * PdfPageFormat.cm),
+        pageFormat: PdfPageFormat(5.4 * PdfPageFormat.cm, 20 * PdfPageFormat.cm, marginAll: 0.3 * PdfPageFormat.cm),
         build: (context) => [
           pw.Container(
               child: pw.Center(
@@ -492,6 +502,7 @@ class _PrintTestState extends State<PrintTest> {
                 ),
           ),
           ),
+       
         ],
       )
     );

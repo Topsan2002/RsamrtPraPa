@@ -10,20 +10,24 @@ String dasdBoardDataToJson(List<DasdBoardData> data) => json.encode(List<dynamic
 
 class DasdBoardData {
     DasdBoardData({
-      required  this.memberAll,
+      required  this.profileName,
       required  this.member,
+      required  this.unitData,
     });
 
-    String memberAll;
+    String profileName;
     String member;
+    String unitData;
 
     factory DasdBoardData.fromJson(Map<String, dynamic> json) => DasdBoardData(
-        memberAll: json["member_all"],
+        profileName: json["profile_name"],
         member: json["member"],
+        unitData: json["unit_data"],
     );
 
     Map<String, dynamic> toJson() => {
-        "member_all": memberAll,
+        "profile_name": profileName,
         "member": member,
+        "unit_data": unitData,
     };
 }
