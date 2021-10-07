@@ -4,44 +4,48 @@
 
 import 'dart:convert';
 
-List<DataProfile> dataProfileFromJson(String str) => List<DataProfile>.from(json.decode(str).map((x) => DataProfile.fromJson(x)));
+List<DataProfile> dataProfileFromJson(String str) => List<DataProfile>.from(
+    json.decode(str).map((x) => DataProfile.fromJson(x)));
 
-String dataProfileToJson(List<DataProfile> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String dataProfileToJson(List<DataProfile> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class DataProfile {
-    DataProfile({
-      required  this.profileName,
-      required  this.profileSub,
-      required  this.address,
-      required  this.tombon,
-      required  this.umpher,
-      required  this.province,
-      required  this.zipcode,
-      required  this.phone,
-      required  this.fax,
-      required  this.email,
-      required  this.vat,
-      required  this.manager,
-      required  this.service,
-      required  this.provinceCode,
-    });
+  DataProfile({
+    required this.profileName,
+    required this.profileSub,
+    required this.address,
+    required this.tombon,
+    required this.umpher,
+    required this.province,
+    required this.zipcode,
+    required this.phone,
+    required this.fax,
+    required this.email,
+    required this.vat,
+    required this.manager,
+    required this.service,
+    required this.provinceCode,
+    required this.binPrice,
+  });
 
-    String profileName;
-    String profileSub;
-    String address;
-    String tombon;
-    String umpher;
-    String province;
-    String zipcode;
-    String phone;
-    String fax;
-    String email;
-    String vat;
-    String manager;
-    String service;
-    String provinceCode;
+  String profileName;
+  String profileSub;
+  String address;
+  String tombon;
+  String umpher;
+  String province;
+  String zipcode;
+  String phone;
+  String fax;
+  String email;
+  String vat;
+  String manager;
+  String service;
+  String provinceCode;
+  String binPrice;
 
-    factory DataProfile.fromJson(Map<String, dynamic> json) => DataProfile(
+  factory DataProfile.fromJson(Map<String, dynamic> json) => DataProfile(
         profileName: json["profile_name"],
         profileSub: json["profile_sub"],
         address: json["address"],
@@ -56,9 +60,10 @@ class DataProfile {
         manager: json["manager"],
         service: json["service"],
         provinceCode: json["province_code"],
-    );
+        binPrice: json["bin_price"] == null ? '' : json["bin_price"],
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "profile_name": profileName,
         "profile_sub": profileSub,
         "address": address,
@@ -73,5 +78,6 @@ class DataProfile {
         "manager": manager,
         "service": service,
         "province_code": provinceCode,
-    };
+        "bin_price": binPrice,
+      };
 }

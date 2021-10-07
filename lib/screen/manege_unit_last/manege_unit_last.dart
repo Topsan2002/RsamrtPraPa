@@ -18,16 +18,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class ManegeLastUnit extends StatefulWidget {
-  const ManegeLastUnit({ Key? key }) : super(key: key);
+  const ManegeLastUnit({Key? key}) : super(key: key);
 
   @override
   _ManegeLastUnitState createState() => _ManegeLastUnitState();
 }
 
 class _ManegeLastUnitState extends State<ManegeLastUnit> {
-
   var path;
-  int numSteam =0;
+  int numSteam = 0;
   var waterId;
   var memName;
   var adminID;
@@ -40,11 +39,9 @@ class _ManegeLastUnitState extends State<ManegeLastUnit> {
   void initState() {
     super.initState();
     _getWaterID();
-    
   }
 
   _getWaterID() async {
-
     SharedPreferences member = await SharedPreferences.getInstance();
     SharedPreferences user = await SharedPreferences.getInstance();
     setState(() {
@@ -53,50 +50,42 @@ class _ManegeLastUnitState extends State<ManegeLastUnit> {
       memName = member.getString('member_name');
       adminID = user.getString('admin_id');
       date = user.getString('date_last');
-     // print('this test'+date);
+      // print('this test'+date);
       //getMemberData();
     });
-
   }
 
   Future getMemberData() async {
+    var url = Uri.parse(
+        "http://${path}/appapi/rsmart/api/appApi/User/api_member_data.php");
 
-    var url = Uri.parse("http://${path}/appapi/rsmart/api/appApi/User/api_member_data.php");
-   
-   // var url = Uri.parse("http://192.168.43.26/rsmart/api/appApi/User/api_member_data.php");
+    // var url = Uri.parse("http://192.168.43.26/rsmart/api/appApi/User/api_member_data.php");
 
-    var data = {"water_id":waterId};
+    var data = {"water_id": waterId};
     //print(data);
     var response = await http.post(
       url,
       body: data,
       headers: <String, String>{
-        'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8'
-        },
-      );
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      },
+    );
 
-   // print(response.body);  
+    // print(response.body);
 
-    if (response.statusCode == 200 ) {
+    if (response.statusCode == 200) {
       return response.body;
-    }else{
+    } else {
       return response.body;
     }
- 
-    
   }
-
-
-
-
-
 
   final StreamController _stream = new StreamController();
 
   void saveUnit() {
     numSteam = 1;
     _stream.sink.add(numSteam);
-   // print(numSteam);
+    // print(numSteam);
   }
 
   void savepayother() {
@@ -105,362 +94,328 @@ class _ManegeLastUnitState extends State<ManegeLastUnit> {
   }
 
   void saveUnitHost() async {
+    var url = Uri.parse(
+        "http://${path}/appapi/rsmart/api/appApi/User/api_input_unit_last.php");
 
-    var url = Uri.parse("http://${path}/appapi/rsmart/api/appApi/User/api_input_unit_last.php");
+    // var url = Uri.parse("http://192.168.43.26/rsmart/api/appApi/User/api_input_unit_last.php");
 
-   // var url = Uri.parse("http://192.168.43.26/rsmart/api/appApi/User/api_input_unit_last.php");
+    var data = {
+      "unit_input": waterUnit.text,
+      "water_id": waterId,
+      "admin_id": adminID,
+      "last_mon": date
+    };
 
-    var data = {"unit_input":waterUnit.text, "water_id":waterId, "admin_id":adminID, "last_mon":date};
+    var response = await http.post(url, body: data, headers: <String, String>{
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    });
 
-    var response = await http.post(
-      url,
-      body:data,
-      headers: <String, String> {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-      }
-      );
-
-
-      if(response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('บันทึกข้อมูลสำเร็จ'))
-      );
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('บันทึกข้อมูลสำเร็จ')));
       Navigator.pushReplacement(
         context,
-        PageTransition(type: PageTransitionType.rightToLeft, child: ManageUnit()),
-        );
-
-      }else if (response.statusCode == 401) {
-        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณาใส่เลขมิตเตอร์'))
+        PageTransition(
+            type: PageTransitionType.rightToLeft, child: ManageUnit()),
       );
+    } else if (response.statusCode == 401) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('กรุณาใส่เลขมิตเตอร์')));
+    } else if (response.statusCode == 402) {
+      _showMyDialog();
 
-      }else if(response.statusCode == 402) {
+      //ScaffoldMessenger.of(context).showSnackBar(
+      //const SnackBar(content: Text('จำนวณเลขมิตเตอร์น้อยกว่าครั้งก่อน'))
+      //);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('คุณได้บันทึกข้อมูลเดือนนี้ไปแล้ว')));
+    }
 
-        _showMyDialog();
-
-        //ScaffoldMessenger.of(context).showSnackBar(
-        //const SnackBar(content: Text('จำนวณเลขมิตเตอร์น้อยกว่าครั้งก่อน'))
-        //);
-      }else  {
-        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('คุณได้บันทึกข้อมูลเดือนนี้ไปแล้ว'))
-      );
-      }
-
-      print(response.body);
-
-
-
+    print(response.body);
   }
 
   Future<void> _showMyDialog() async {
-  return showDialog<void>(
-    context: context,
-    barrierDismissible: false, // user must tap button!
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('คุณกำลังกรอกเลขมิเตอร์น้อยกว่าครั้งก่อน'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: const <Widget>[
-              Text('คุณต้องการกรอกเลขมิเตอร์น้ำที่น้อยกว่าเลขอ่านครั้งก่อนใช่หรือไม่ ?'),
-              //Text('Would you like to approve of this message?'),
-            ],
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('คุณกำลังกรอกเลขมิเตอร์น้อยกว่าครั้งก่อน'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text(
+                    'คุณต้องการกรอกเลขมิเตอร์น้ำที่น้อยกว่าเลขอ่านครั้งก่อนใช่หรือไม่ ?'),
+                //Text('Would you like to approve of this message?'),
+              ],
+            ),
           ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('ใช่'),
-            onPressed: () {
-             unitMinLast();
-              Navigator.of(context).pop();  
-
-            },
-          ),
-          TextButton(
-            child: const Text('ไม่ใช่'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
-
-
-
-  
-  void unitMinLast() async {
-    var url = Uri.parse("http://${path}/appapi/rsmart/api/appApi/User/api_input_unit_last_min_last.php");
-    
-      var data = {"unit_input":waterUnit.text, "water_id":waterId, "admin_id":adminID, "last_mon":date};
-
-      var response = await http.post(
-        url,
-        body: data,
-        headers: <String, String>{
-          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-        }
-      );
-
-     if(response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('บันทึกข้อมูลสำเร็จ'))
-      );
-       numSteam = 0;
-      _stream.sink.add(numSteam);
-     // Navigator.pushReplacement(
-     //   context,
-     //   PageTransition(type: PageTransitionType.rightToLeft, child: ManageUnit()),
-     //   );
-
-      }else if (response.statusCode == 401) {
-        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณาใส่เลขมิตเตอร์'))
-      );
-     }else  {
-        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('คุณได้บันทึกข้อมูลเดือนนี้ไปแล้ว'))
-      );
-      }
-
+          actions: <Widget>[
+            TextButton(
+              child: const Text('ใช่'),
+              onPressed: () {
+                unitMinLast();
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('ไม่ใช่'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
+  void unitMinLast() async {
+    var url = Uri.parse(
+        "http://${path}/appapi/rsmart/api/appApi/User/api_input_unit_last_min_last.php");
 
+    var data = {
+      "unit_input": waterUnit.text,
+      "water_id": waterId,
+      "admin_id": adminID,
+      "last_mon": date
+    };
+
+    var response = await http.post(url, body: data, headers: <String, String>{
+      'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+    });
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('บันทึกข้อมูลสำเร็จ')));
+      numSteam = 0;
+      _stream.sink.add(numSteam);
+      // Navigator.pushReplacement(
+      //   context,
+      //   PageTransition(type: PageTransitionType.rightToLeft, child: ManageUnit()),
+      //   );
+
+    } else if (response.statusCode == 401) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('กรุณาใส่เลขมิตเตอร์')));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('คุณได้บันทึกข้อมูลเดือนนี้ไปแล้ว')));
+    }
+  }
 
   void savePayOtherHost() async {
-
-
-    var url = Uri.parse("http://${path}/appapi/rsmart/api/appApi/User/api_unit_other.php");
-   // var url = Uri.parse("http://192.168.43.26/rsmart/api/appApi/User/api_unit_other.php");
-    var data = {"unit_other":otherPayName.text, "amount_other":otherPayTotal.text, "water_id":waterId};
+    var url = Uri.parse(
+        "http://${path}/appapi/rsmart/api/appApi/User/api_unit_other.php");
+    // var url = Uri.parse("http://192.168.43.26/rsmart/api/appApi/User/api_unit_other.php");
+    var data = {
+      "unit_other": otherPayName.text,
+      "amount_other": otherPayTotal.text,
+      "water_id": waterId
+    };
     //print(data);
-    var response = await http.post(
-      url,
-      body: data,
-      headers: <String, String> {
-        'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8'
-      }
-    );
+    var response = await http.post(url, body: data, headers: <String, String>{
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    });
 
-  if (response.statusCode == 200) {
-     ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('บันทึกข้อมูลสำเร็จ'))
-      );
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('บันทึกข้อมูลสำเร็จ')));
 
       numSteam = 0;
       _stream.sink.add(numSteam);
-   //   Navigator.pushReplacement(
-   //     context,
-   //     PageTransition(type: PageTransitionType.rightToLeft, child: ManageUnit()),
-   //     );
+      //   Navigator.pushReplacement(
+      //     context,
+      //     PageTransition(type: PageTransitionType.rightToLeft, child: ManageUnit()),
+      //     );
 //
-  }else {
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน'))
-      );
-  }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')));
+    }
 
     //print(response.statusCode);
     //print(response.body);
-
-    
-
-
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
-        leading:  IconButton(
-        icon: Icon(Icons.home) ,
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            PageTransition(child: Menu(), type: PageTransitionType.fade),
-          );
-        },
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.home),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              PageTransition(child: Menu(), type: PageTransitionType.fade),
+            );
+          },
         ),
-        title:Text(
+        title: Text(
           'บันทึกค่าน้ำเดือนปัจจุบัน',
-          style:TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
-          ),
-          backgroundColor: Colors.blue[400],
-          //actions: <Widget>[
-          //
-          //Container(
-          //  margin: EdgeInsets.only(right: 15),
-          //  child: IconButton(
-          //    tooltip: 'บัญชีของคุณ',
-          //    icon:Icon(
-          //      Icons.person,
-          //    ),
-          //    onPressed: () {
-          //       Navigator.push(
-          //        context,
-          //        PageTransition(child: ShowUserData(), type: PageTransitionType.rightToLeft)
-          //        );
-          //    },
-          //  ) ,
-          //),
-         // ],
+        ),
+        backgroundColor: Colors.blue[400],
+        //actions: <Widget>[
+        //
+        //Container(
+        //  margin: EdgeInsets.only(right: 15),
+        //  child: IconButton(
+        //    tooltip: 'บัญชีของคุณ',
+        //    icon:Icon(
+        //      Icons.person,
+        //    ),
+        //    onPressed: () {
+        //       Navigator.push(
+        //        context,
+        //        PageTransition(child: ShowUserData(), type: PageTransitionType.rightToLeft)
+        //        );
+        //    },
+        //  ) ,
+        //),
+        // ],
       ),
-      body:RefreshIndicator(
+      body: RefreshIndicator(
         onRefresh: () {
-          return 
-          Navigator.pushReplacement(
+          return Navigator.pushReplacement(
             context,
-            PageTransition(type: PageTransitionType.fade, child:ManegeLastUnit() ),
+            PageTransition(
+                type: PageTransitionType.fade, child: ManegeLastUnit()),
           );
         },
         child: ListView(
-            children: <Widget>[ 
-              Center(
-                child: Column(
-                  children: [
-                    FutureBuilder(
+          children: <Widget>[
+            Center(
+              child: Column(
+                children: [
+                  FutureBuilder(
                       future: getMemberData(),
-                      builder: (BuildContext buildcontext, AsyncSnapshot snapshot) {
+                      builder:
+                          (BuildContext buildcontext, AsyncSnapshot snapshot) {
                         if (snapshot.hasData) {
-        
                           var res = jsonDecode(snapshot.data);
-                          List<MemberDataUnit> memData  = memberDataUnitFromJson(jsonEncode(res['data'])) ;
-        
+                          List<MemberDataUnit> memData =
+                              memberDataUnitFromJson(jsonEncode(res['data']));
+
                           return Column(
-                            children: memData.map((e) =>
-                            Column(
-                              children: [
-                                 textHeader(
-                                text: 'ข้อมูลผู้ใช้น้ำ',
-                              ),
-                              textDataUser(
-                                text:'ชื่อ-นามสกุล : ${memName}'
-                              ),
-                              textDataUser(
-                                text: 'เลขอ่านครั้งก่อน :  ${e.unit}'
-                                ),
-                              textDataUser(
-                                text: 'ต้องจ่ายเดือนนี้ : ${e.totalPay} บาท'
-                                ),
-                              textDataUser(
-                                text:  'สถานะ : ${e.status}'
-                                ),
-                              ],
-                            ),
-                            
-                            ).toList(),
-                            );
-        
-                        }else if (snapshot.hasError) {
-        
-                          return Center(
-                              child: CircularProgressIndicator(),
-                            );
-        
-        
-                        }else{
-        
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-        
-                        }
-                      }
-                      ),
-                   
-                    
-                      StreamBuilder(
-                        stream: _stream.stream,
-                        builder: (BuildContext buildcontext, AsyncSnapshot snapshot) {
-        
-                            if (snapshot.data == null || snapshot.data == 0) {
-                              return Column(
-                                children: [
-                                  toolDashboardUnit(
-                                          press1: () {
-                                            saveUnit();
-                                          },
-                                          press2: () {
-        
-                                            Navigator.push(
-                                              context,
-                                              PageTransition(type: PageTransitionType.rightToLeft, child: PrintTest()),
-                                            );
-        
-                                          },
-                                          press3: () {
-                                             Navigator.push(
-                                              context,
-                                              PageTransition(type: PageTransitionType.rightToLeft, child: PrintBill()),
-                                            );
-                                          },
-                                          press4: () {
-                                             savepayother();
-                                          },
-                                        ),
-                                  buttonCallBack(
-                                    press: () {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        PageTransition(type: PageTransitionType.rightToLeft, child: LastUnit()),
-                                      );
-                                    }
+                            children: memData
+                                .map(
+                                  (e) => Column(
+                                    children: [
+                                      textHeader(
+                                        text: 'ข้อมูลผู้ใช้น้ำ',
+                                      ),
+                                      textDataUser(
+                                          text: 'ชื่อ-นามสกุล : ${memName}'),
+                                      textDataUser(
+                                          text:
+                                              'เลขอ่านครั้งก่อน :  ${e.unit}'),
+                                      textDataUser(
+                                          text:
+                                              'ต้องจ่ายเดือนนี้ : ${e.totalPay} บาท'),
+                                      textDataUser(text: 'สถานะ : ${e.status}'),
+                                    ],
                                   ),
-                                ],
-                              );
-                            }else if(snapshot.data == 1) {
-                              return inputUnitWater(
-                                pressSave: (){
-                                  saveUnitHost();
+                                )
+                                .toList(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                      }),
+                  StreamBuilder(
+                      stream: _stream.stream,
+                      builder:
+                          (BuildContext buildcontext, AsyncSnapshot snapshot) {
+                        if (snapshot.data == null || snapshot.data == 0) {
+                          return Column(
+                            children: [
+                              toolDashboardUnit(
+                                press1: () {
+                                  saveUnit();
                                 },
-                                pressCallBack: (){
-        
-                                  numSteam = 0;
-                                  _stream.sink.add(numSteam);
-                                  // Navigator.push(
-                                  //      context,
-                                  //      PageTransition(type: PageTransitionType.rightToLeft, child: ManageUnit()),
-                                  //    );
+                                press2: () {
+                                  Navigator.push(
+                                    context,
+                                    PageTransition(
+                                        type: PageTransitionType.rightToLeft,
+                                        child: PrintTest()),
+                                  );
                                 },
-                                controller: waterUnit,
-                              );
-                            }else if (snapshot.data == 4) {
-                              return otherPay(
-                                controllerPayName: otherPayName,
-                                controllerPayTotal: otherPayTotal,
-                                pressSave: (){
-                                  savePayOtherHost();
+                                press3: () {
+                                  Navigator.push(
+                                    context,
+                                    PageTransition(
+                                        type: PageTransitionType.rightToLeft,
+                                        child: PrintReciveBin()),
+                                  );
                                 },
-                                pressCallBack: () {
-                                  numSteam = 0;
-                                  _stream.sink.add(numSteam);
+                                press4: () {
+                                  savepayother();
+                                },
+                              ),
+                              buttonCallBack(press: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  PageTransition(
+                                      type: PageTransitionType.rightToLeft,
+                                      child: LastUnit()),
+                                );
+                              }),
+                            ],
+                          );
+                        } else if (snapshot.data == 1) {
+                          return inputUnitWater(
+                            pressSave: () {
+                              saveUnitHost();
+                            },
+                            pressCallBack: () {
+                              numSteam = 0;
+                              _stream.sink.add(numSteam);
+                              // Navigator.push(
+                              //      context,
+                              //      PageTransition(type: PageTransitionType.rightToLeft, child: ManageUnit()),
+                              //    );
+                            },
+                            controller: waterUnit,
+                          );
+                        } else if (snapshot.data == 4) {
+                          return otherPay(
+                              controllerPayName: otherPayName,
+                              controllerPayTotal: otherPayTotal,
+                              pressSave: () {
+                                savePayOtherHost();
+                              },
+                              pressCallBack: () {
+                                numSteam = 0;
+                                _stream.sink.add(numSteam);
                                 //  Navigator.pushReplacement(
                                 //  context,
                                 //  PageTransition(type: PageTransitionType.rightToLeft, child: ManageUnit()),
                                 //  );
-                                }
-                              );
-                          
-                            }else {
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  color: Colors.blue[200],
-                                ),
-                              );
-                            }
+                              });
+                        } else {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.blue[200],
+                            ),
+                          );
                         }
-                        ),
-                  ],
-                ),
+                      }),
+                ],
               ),
-        
-            ],
             ),
+          ],
+        ),
       ),
     );
   }

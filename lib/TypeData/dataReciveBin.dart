@@ -1,17 +1,18 @@
 // To parse this JSON data, do
 //
-//     final dataRecive = dataReciveFromJson(jsonString);
+//     final dataReciveBin = dataReciveBinFromJson(jsonString);
 
 import 'dart:convert';
 
-List<DataRecive> dataReciveFromJson(String str) =>
-    List<DataRecive>.from(json.decode(str).map((x) => DataRecive.fromJson(x)));
+List<DataReciveBin> dataReciveBinFromJson(String str) =>
+    List<DataReciveBin>.from(
+        json.decode(str).map((x) => DataReciveBin.fromJson(x)));
 
-String dataReciveToJson(List<DataRecive> data) =>
+String dataReciveBinToJson(List<DataReciveBin> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class DataRecive {
-  DataRecive({
+class DataReciveBin {
+  DataReciveBin({
     required this.profileName,
     required this.profileTax,
     required this.profileAddress,
@@ -40,6 +41,8 @@ class DataRecive {
     required this.meterLast,
     required this.lastInput,
     required this.lastTotal,
+    required this.binPrice,
+    required this.totalForUnit,
     required this.pormpay,
   });
 
@@ -71,9 +74,11 @@ class DataRecive {
   String meterLast;
   String lastInput;
   String lastTotal;
+  String binPrice;
+  String totalForUnit;
   String pormpay;
 
-  factory DataRecive.fromJson(Map<String, dynamic> json) => DataRecive(
+  factory DataReciveBin.fromJson(Map<String, dynamic> json) => DataReciveBin(
         profileName: json["profile_name"],
         profileTax: json["profile_tax"],
         profileAddress: json["profile_address"],
@@ -102,6 +107,8 @@ class DataRecive {
         meterLast: json["meter_last"],
         lastInput: json["last_input"],
         lastTotal: json["last_total"],
+        binPrice: json["bin_price"],
+        totalForUnit: json["total_for_unit"],
         pormpay: json["pormpay"] == null || json["pormpay"] == ""
             ? 'lock.png'
             : json["pormpay"],
@@ -136,6 +143,8 @@ class DataRecive {
         "meter_last": meterLast,
         "last_input": lastInput,
         "last_total": lastTotal,
+        "bin_price": binPrice,
+        "total_for_unit": totalForUnit,
         "pormpay": pormpay,
       };
 }

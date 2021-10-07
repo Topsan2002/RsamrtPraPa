@@ -2,352 +2,229 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:rsmart/TypeData/dashBoardData.dart';
 import 'package:rsmart/screen/confic/confic.dart';
 import 'package:rsmart/screen/dashboard/dashboard.dart';
-import 'package:rsmart/screen/dataUser/dataUser.dart';
 import 'package:rsmart/screen/editprofile/edit_profile.dart';
-import 'package:rsmart/screen/lastUnit/lastUnit.dart';
-import 'package:rsmart/screen/manage_unit/componentes/manage_unutStyle.dart';
+import 'package:rsmart/screen/menu/components/menutile.dart';
+import 'package:rsmart/screen/menu/components/menutool.dart';
 import 'package:rsmart/screen/pay/pay.dart';
 import 'package:rsmart/screen/unPay/unPay.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Menu extends StatefulWidget {
-  const Menu({ Key? key }) : super(key: key);
+  const Menu({Key? key}) : super(key: key);
 
   @override
   _MenuState createState() => _MenuState();
 }
 
 class _MenuState extends State<Menu> {
-
   var path;
 
   void initState() {
     super.initState();
     getPath();
   }
-  getPath() async{
+
+  getPath() async {
     SharedPreferences user = await SharedPreferences.getInstance();
-      setState(() {
-        path = user.getString('path');
-        
-      });
-
+    setState(() {
+      path = user.getString('path');
+    });
   }
-
 
   Future getDataDashBoard() async {
+    await path != null;
+    //var url = Uri.parse("http://192.168.43.26/rsmart/api/appApi/User/api_profile_show.php");
+    var url = Uri.parse(
+        "http://${path}/appapi/rsmart/api/appApi/User/api_profile_show.php");
 
-   //var url = Uri.parse("http://192.168.43.26/rsmart/api/appApi/User/api_profile_show.php");
-   var url = Uri.parse("http://${path}/appapi/rsmart/api/appApi/User/api_profile_show.php");
-    //print(url);
-    var response = await http.get(
-      url,
-      headers: <String, String> {
-        'Content-Type' : 'application/x-www-form-urlencoded; charset=utf-8',
-      }
-    );
+    var response = await http.get(url, headers: <String, String>{
+      'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+    });
 
-    if (response.statusCode== 200) {
+    if (response.statusCode == 200) {
       return response.body;
-    }else{
+    } else {
       return 1;
     }
-
   }
-
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-        icon: Icon(Icons.water_damage_outlined) ,
-        onPressed: () {
-
-        },
-        ),
-        title:Text(
-          'ระบบประปาเพื่อชมชน',
-          style:TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-          ),
-          backgroundColor: Colors.blue[400],
-          actions: <Widget>[
-          
-          Container(
-            margin: EdgeInsets.only(right: 15),
-            child: IconButton(
-              tooltip: 'บัญชีของคุณ',
-              icon:Icon(
-                Icons.person,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () {
+            return Navigator.pushReplacement(
+              context,
+              PageTransition(
+                child: Menu(),
+                type: PageTransitionType.fade,
               ),
-              onPressed: () {
-
-                 Navigator.push(
-                  context,
-                  PageTransition(child: ShowUserData(), type: PageTransitionType.rightToLeft)
-                  );
-
-              },
-            ) ,
-          ),
-          ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: (){
-          return Navigator.pushReplacement(context, 
-          PageTransition(child:Menu(), type:PageTransitionType.fade ),
-          );
-        },
-        child: ListView(
-          children: <Widget> [
-            Center(
-              child:Column(
-                children: <Widget>  [
-                  textHeader(
-                    text:'เมนูหลัก',
-                  ),
-                  FutureBuilder(
-                    future: getDataDashBoard(),
-                    builder: (BuildContext buildContext, AsyncSnapshot snapshot) {
-                      if (snapshot.data == 1){
-                        return Text('API ERROR');
-                      }else if (snapshot.hasData){
-                        var res = jsonDecode(snapshot.data);
-                        List<DasdBoardData> dashboard = dasdBoardDataFromJson(jsonEncode(res['data']));
-
-
-                        return Column(
-                          children: dashboard.map((e) => 
-                          Column(
-                            children: [
-                              simpleText(
-                                text: e.profileName,
-                              ),
-                              simpleText(
-                                text : 'จำนวนผู้ใช้น้ำทั้งหมด  : ${e.member} บ้าน',
-                              ),
-                              simpleText(
-                                text: 'จดค่าน้ำแล้ว : ${e.unitData} บ้าน'
-                              ),
-                            ],
-                          ),
-                          ).toList(),
-                        );
-                      }else{
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                    }
+            );
+          },
+          child: ListView(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.h,
+                  vertical: 10.h,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    titleMenu(
+                      future: getDataDashBoard(),
                     ),
-                 
-                Column(
-                  children: <Widget> [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(12, 20, 12, 30),
-                      child:Center(
-                        child:Wrap(
-                          spacing: size.width*0.01,
-                          runSpacing: size.width*0.01,
-                          children: [
-                            toolMenu(
-                              text: 'บันทึกค่าน้ำ\nปัจจุบัน',
-                              img: 'assets/icon/contract.png',
-                              press: () {
-                                Navigator.push(
-                                  context,
-                                  PageTransition(child: Dashboard(), type: PageTransitionType.rightToLeft),
-                                  );
-                              },
-                            ),
-                            toolMenu(
-                              text: 'บันทึกค่าน้ำ\nย้อนหลัง',
-                              img:'assets/icon/return.png',
-                              press: () {
-                                Navigator.push(
-                                  context, 
-                                  PageTransition(type: PageTransitionType.rightToLeft, child:LastUnit()),
-                                  );
-                              },
-                            ),
-                            toolMenu(
-                              text: 'รายการชำระเงินแล้ว',
-                              img:'assets/icon/doc_blue.png',
-                              press: () {
-                                Navigator.push(
-                                  context,
-                                  PageTransition(type: PageTransitionType.rightToLeft, child: Pay() )
-                                );
-                              },
-                              ),
-                            toolMenu(
-                              text: 'รายการค้างชำระ',
-                              img:'assets/icon/doc.png',
-                              press: () {
-                                Navigator.push(
-                                  context,
-                                  PageTransition(type: PageTransitionType.rightToLeft, child: UnPay()),
-                                );
-                              },
-                            ),
-                            toolMenu(
-                              text: 'จัดการข้อมูลองค์กร',
-                              img: 'assets/icon/editprofile.png',
-                              press: () {
-                                Navigator.push(
-                                  context,
-                                  PageTransition(type: PageTransitionType.fade, child: EditProfile()),
-                                );
-                              },
-                            ),
-                            SizedBox(
-                             width: size.width* 0.45,
-                             height: size.height*0.27,
-                             child:Card(
-                               color: Colors.red[300],
-                               child:Center(
-                                 child:Padding(
-                                   padding: EdgeInsets.all(8),
-                                   child: FlatButton(
-                                     onPressed: () async {
-                                          SharedPreferences user = await SharedPreferences.getInstance();
-                                          user.remove('user_id');
-                                          user.remove('admin_id');
-                                          user.remove('water_id');
-                                          user.remove('member_name');
-                                          user.remove('path');
-                                          Navigator.pushReplacement(
-                                            context,
-                                            PageTransition(child: Confic(), type: PageTransitionType.fade),
-                                            );
-                                     },
-                                     child:Column(
-                                       children: [
-                                         Image.asset(
-                                           'assets/icon/logout.png',
-                                           height: size.height*0.15,
-                                           width: size.width*0.2,
-                                         ),
-                                         Center(
-                                           child: Text(
-                                             'ออกจากระบบ',
-                                             style:TextStyle(
-                                               fontSize: 18,
-                                               fontWeight:FontWeight.bold,
-                                               color:Colors.white,
-                                             ),
-                                             textAlign: TextAlign.center,
-                                           ),
-                                         ),
-                                       ],
-                                     ),
-                                   ),
-                                 ),
-                               ),
-                             ),
-                            )
-                          ],
+                    SizedBox(
+                      height: 10.h,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 15.h,
+                        vertical: 20.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                          10.r,
                         ),
                       ),
+                      child: Column(
+                        children: [
+                          menuitem(
+                            text: 'บันทึกค่าน้ำปัจจุบัน',
+                            img: 'assets/icon/write.png',
+                            press: () {
+                              Navigator.push(
+                                context,
+                                PageTransition(
+                                  child: Dashboard(),
+                                  type: PageTransitionType.rightToLeft,
+                                ),
+                              );
+                            },
+                          ),
+                          SizedBox(
+                            height: 10.h,
+                          ),
+                          menuitem(
+                            text: 'จัดการข้อมูลองค์กร',
+                            img: 'assets/icon/dossier.png',
+                            press: () {
+                              Navigator.push(
+                                context,
+                                PageTransition(
+                                  type: PageTransitionType.fade,
+                                  child: EditProfile(),
+                                ),
+                              );
+                            },
+                          ),
+                          // SizedBox(
+                          //   height: 10.h,
+                          // ),
+                          // menuitem(
+                          //   text: 'บันทึกค่าน้ำย้อนหลัง',
+                          //   img: 'assets/icon/return.png',
+                          //   press: () {
+                          //     Navigator.push(
+                          //       context,
+                          //       PageTransition(
+                          //           type: PageTransitionType.rightToLeft,
+                          //           child: LastUnit()),
+                          //     );
+                          //   },
+                          // ),
+                          SizedBox(
+                            height: 10.h,
+                          ),
+                          menuitem(
+                            text: 'รายการชำระเงินแล้ว',
+                            img: 'assets/icon/doc_blue.png',
+                            press: () {
+                              Navigator.push(
+                                  context,
+                                  PageTransition(
+                                      type: PageTransitionType.rightToLeft,
+                                      child: Pay()));
+                            },
+                          ),
+                          SizedBox(
+                            height: 10.h,
+                          ),
+                          menuitem(
+                            text: 'รายการค้างชำระ',
+                            img: 'assets/icon/doc.png',
+                            press: () {
+                              Navigator.push(
+                                context,
+                                PageTransition(
+                                    type: PageTransitionType.rightToLeft,
+                                    child: UnPay()),
+                              );
+                            },
+                          ),
+                          SizedBox(
+                            height: 10.h,
+                          ),
+                          FlatButton(
+                            padding: EdgeInsets.all(0),
+                            onPressed: () async {
+                              SharedPreferences user =
+                                  await SharedPreferences.getInstance();
+                              user.remove('user_id');
+                              user.remove('admin_id');
+                              user.remove('water_id');
+                              user.remove('member_name');
+                              user.remove('path');
+                              Navigator.pushReplacement(
+                                context,
+                                PageTransition(
+                                    child: Confic(),
+                                    type: PageTransitionType.fade),
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.h,
+                                vertical: 10.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red[300],
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: ListTile(
+                                leading: Image.asset(
+                                  'assets/icon/logout.png',
+                                  height: 40.h,
+                                ),
+                                title: Text(
+                                  'ออกจากระบบ',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                     
+                    ),
                   ],
                 ),
-                ],
               ),
-            ),
-          ],
-        ) ,
-        ),
-    );
-  }
-}
-
-class simpleText extends StatelessWidget {
-  final String text;
-  const simpleText({
-    Key? key,
-    required this.text,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(top:10),
-      child:Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 18,
+            ],
           ),
         ),
       ),
     );
   }
 }
-
-class toolMenu extends StatelessWidget {
-  final String text;
-  final img;
-  final press;
-  const toolMenu({
-    Key? key,
-    required this.text,
-    this.img,
-    this.press,
-  }) : super(key: key);
-
- 
-
-  @override
-  Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return SizedBox(
-      width: size.width* 0.45,
-      height: size.height*0.27,
-      child:Card(
-        color: Colors.blue[200],
-        child:Center(
-          child:Padding(
-            padding: EdgeInsets.all(8),
-            child: FlatButton(
-              onPressed: press,
-              child:Column(
-                children: [
-                  Image.asset(
-                    img,
-                    height: size.height*0.15,
-                    width: size.width*0.2,
-                  ),
-                  Center(
-                    child: Text(
-                      text,
-                      style:TextStyle(
-                        fontSize: 18,
-                        fontWeight:FontWeight.bold,
-                        color:Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
